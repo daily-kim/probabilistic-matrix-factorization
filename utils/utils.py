@@ -2,12 +2,12 @@ import zipfile, requests, io
 import numpy as np
 import os
 
-
 def get_data(mode = "download", 
-    data_url ="http://files.grouplens.org/datasets/movielens/ml-100k.zip", 
-    data_path = "./data/ml-100k/u.data"):
-    if mode=="download":
-        if not (os.path.isdir(data_path)):
+    data_url="http://files.grouplens.org/datasets/movielens/ml-100k.zip",
+    data_path="./data/ml-100k/u.data"):
+
+    if mode == "download":
+        if not (os.path.isfile(data_path)):
             r = requests.get(data_url)
             z = zipfile.ZipFile(io.BytesIO(r.content))
             z.extractall("./data")

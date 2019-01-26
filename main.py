@@ -2,12 +2,15 @@ import numpy as np
 from utils.utils import get_data, split_data
 import argparse
 from pmf.model import PMF
+from pmf.constrained_pmf import CPMF
 SEED = np.random.randint(0, 1000)
 print("Seed is ", SEED)
 np.random.seed(SEED)
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--algorithm", default="CPMF",
+                        type=str, help="Algorithm to use")
     parser.add_argument("--mode", default="netflix",
                         type=str, help="Download data mode or load data mode")
     parser.add_argument("--data_url",
@@ -18,11 +21,11 @@ if __name__=="__main__":
                         type=int, help="Number of epochs")
     parser.add_argument("--batch_size", default=1000,
                         type=int, help="Size of batches")
-    parser.add_argument("--lamda", default=.1,
+    parser.add_argument("--lamda", default=.01,
                         type=float, help="Regularization parameter")
     parser.add_argument("--momentum", default=.8,
                         type=float, help="Momentum for SGD")
-    parser.add_argument("--lr", default=1,
+    parser.add_argument("--lr", default=10,
                         type=float, help="Learning rate parameter")
     parser.add_argument("--features", default=10,
                         type=int, help="Number of latent features")
@@ -54,9 +57,19 @@ if __name__=="__main__":
     params["users"] = np.unique(data[:, 0]).shape[0]
     params["products"] = np.unique(data[:, 1]).shape[0]
 
-    PMF_experiment = PMF(params)
-    PMF_experiment.fit(train, test)
-    PMF_experiment.plot_loss()
+    if args.algorithm == "PMF":
+        PMF_experiment = PMF(params)
+        PMF_experiment.fit(train, test)
+        PMF_experiment.plot_loss()
+
+    #Adaptive Priors
+    elif args.algorithm =="CPMF":
+        CPMF_experiment = CPMF(params)
+        CPMF_experiment.fit(train, test)
+        CPMF_experiment.plot_loss()
+
+    else:
+        print("Invalid algorithm")
 
 
 
