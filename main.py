@@ -44,7 +44,6 @@ if __name__=="__main__":
     else:
         data = get_data(args.mode, "", args.data_path)
 
-
     train, test = split_data(data, SEED, args.test_ratio)
 
     params = dict()
@@ -63,7 +62,7 @@ if __name__=="__main__":
         PMF_experiment.plot_loss()
 
     #Adaptive Priors
-    elif args.algorithm =="CPMF":
+    elif args.algorithm == "CPMF":
         CPMF_experiment = CPMF(params)
         CPMF_experiment.fit(train, test)
         CPMF_experiment.plot_loss()
