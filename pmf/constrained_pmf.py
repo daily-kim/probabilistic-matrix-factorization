@@ -66,9 +66,9 @@ class CPMF:
                 sigmoid_grad = np.multiply(g_pred[:, np.newaxis], (1-g_pred)[:, np.newaxis])
                 pred_grad_Y = np.multiply(l1_error[:, np.newaxis], V[products])
                 pred_grad_V = np.multiply(l1_error[:, np.newaxis], U)
-                batch_grad_W = 2*np.multiply(sigmoid_grad, pred_grad_Y) + lamda*W[products]
-                batch_grad_Y = 2*np.multiply(sigmoid_grad, pred_grad_Y) + lamda*Y[users]
-                batch_grad_V = 2*np.multiply(sigmoid_grad, pred_grad_V) + lamda*V[products]
+                batch_grad_W = 2*np.multiply(sigmoid_grad, pred_grad_Y)
+                batch_grad_Y = 2*np.multiply(sigmoid_grad, pred_grad_Y)
+                batch_grad_V = 2*np.multiply(sigmoid_grad, pred_grad_V)
                 dw_Y = np.zeros((self.n_users, n_features))
                 dw_V = np.zeros((self.n_products, n_features))
                 dw_W = np.zeros((self.n_products, n_features))
@@ -77,10 +77,12 @@ class CPMF:
                 for r in range(batch_size):
                     dw_Y[users[r]] += batch_grad_Y[r]
                     dw_V[products[r]] += batch_grad_V[r]
-                    dw_W[products[r]] += lamda*W[products[r]]
                     k_list = w_filters[users[r]]
-                    dw_W[k_list] += batch_grad_W[r] / k_list.shape[0]
+                    dw_W[k_list] += (batch_grad_W[r]/k_list.shape[0])
 
+                dw_W += lamda * W
+                dw_Y += lamda * Y
+                dw_V += lamda * V
                 update_Y = momentum*update_Y + lr*dw_Y/batch_size
                 update_V = momentum*update_V + lr*dw_V/batch_size
                 Y -= update_Y
