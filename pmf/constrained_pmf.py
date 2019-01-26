@@ -41,10 +41,13 @@ class CPMF:
         update_Y = np.zeros((self.n_users, n_features))
         update_W = np.zeros((self.n_products, n_features))
         update_V = np.zeros((self.n_products, n_features))
+        w_filters = dict()
+        for i in np.unique(train_data[:, 0]):
+            w_filters[i] = train_data[train_data[:, 0] == i][:, 1].astype(int)
 
         print("starting")
         for epoch in range(epochs):
-            print("Epoch: ", epoch, end=" ")
+            print("Epoch: ", epoch+1, end=" ")
             np.random.shuffle(train_data)
 
             for batch in range(round(train_data.shape[0]/batch_size)):
@@ -53,10 +56,8 @@ class CPMF:
                 products = train_batch[:, 1].astype(np.int)
                 ratings = train_batch[:, 2]
                 U = Y[users, :]
-
                 for u in np.unique(users):
-                    w_filter = train_data[train_data[:, 0] == u][:, 1].astype(int)
-                    ws = np.mean(W[w_filter], axis=0)
+                    ws = np.mean(W[w_filters[u]], axis=0)
                     U[u] += ws
 
                 pred = np.sum(np.multiply(U, V[products, :]), 1)
@@ -65,28 +66,25 @@ class CPMF:
                 sigmoid_grad = np.multiply(g_pred[:, np.newaxis], (1-g_pred)[:, np.newaxis])
                 pred_grad_Y = np.multiply(l1_error[:, np.newaxis], V[products])
                 pred_grad_V = np.multiply(l1_error[:, np.newaxis], U)
+                batch_grad_W = 2*np.multiply(sigmoid_grad, pred_grad_Y) + lamda*W[products]
                 batch_grad_Y = 2*np.multiply(sigmoid_grad, pred_grad_Y) + lamda*Y[users]
                 batch_grad_V = 2*np.multiply(sigmoid_grad, pred_grad_V) + lamda*V[products]
                 dw_Y = np.zeros((self.n_users, n_features))
                 dw_V = np.zeros((self.n_products, n_features))
                 dw_W = np.zeros((self.n_products, n_features))
 
+                ## TODO need to vectorize
                 for r in range(batch_size):
                     dw_Y[users[r]] += batch_grad_Y[r]
                     dw_V[products[r]] += batch_grad_V[r]
+                    dw_W[products[r]] += lamda*W[products[r]]
+                    k_list = w_filters[users[r]]
+                    dw_W[k_list] += batch_grad_W[r] / k_list.shape[0]
 
                 update_Y = momentum*update_Y + lr*dw_Y/batch_size
                 update_V = momentum*update_V + lr*dw_V/batch_size
                 Y -= update_Y
                 V -= update_V
-
-                ## TODO need to vectorize
-                for (idx, u) in enumerate(users):
-                    k_list = train_data[train_data[:, 0] == u][:, 1].astype(np.int)
-                    dw_W[k_list] += 2*np.multiply(sigmoid_grad[idx], pred_grad_Y[idx]/k_list.shape[0])
-
-                for p in products:
-                    dw_W[p] += lamda*W[p]
 
                 update_W = momentum*update_W + lr*dw_W/batch_size
                 W -= update_W
