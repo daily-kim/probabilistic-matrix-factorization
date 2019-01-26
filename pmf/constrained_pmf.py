@@ -110,7 +110,7 @@ class CPMF:
             print("Current validation RMSE: ", test_loss)
             self.test_res.append(test_loss)
 
-    #def compute_obj_loss(self, w_u, w_p, rat):
+    #def compute_obj(self, w_u, w_p, rat):
     #    w_u = w_u
     #    w_p = w_p
     #    pred = np.sum(np.multiply(w_u, w_p), 1)
@@ -133,7 +133,7 @@ class CPMF:
         plt.plot(np.arange(self.params["epoch"]), self.test_res, color="blue", label="Test Loss")
         plt.legend()
         plt.grid()
-        plt.title("RMSE Loss vs Epoch for Vanilla PMF")
+        plt.title("RMSE Loss vs Epoch for Constrained PMF")
         plt.xlabel("Epoch")
         plt.ylabel("Loss")
         plt.show()
