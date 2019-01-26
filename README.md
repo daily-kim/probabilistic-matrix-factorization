@@ -10,3 +10,8 @@ If you want, you can use other datasets of the same format. Please check main.py
 For authors' own implementation, please check
 
 `https://www.cs.toronto.edu/~rsalakhu/BPMF.html`
+
+For hyperparameter adjustments, please check the paper itself.
+However, I found the followings effective enough:
+For PMF: LR=2.5, momentum=0.8, lambda=0.25
+For CPMF: LR=50, momentum=0.8, lambda=0.01
