@@ -50,16 +50,16 @@ class PMF:
 
             u_idx = train_data[:, 0].astype(np.int)
             p_idx = train_data[:, 1].astype(np.int)
-            training_loss = self.compute_loss(w_users[u_idx], w_products[p_idx], train_data[:, 2])
-            print("finished. Current training Loss: ", training_loss, end=" ")
+            training_loss = self.compute_rmse_loss(w_users[u_idx], w_products[p_idx], train_data[:, 2])
+            print("finished. Current training RMSE: ", training_loss, end=" ")
             self.train_res.append(training_loss)
             u_idx = test_data[:, 0].astype(np.int)
             p_idx = test_data[:, 1].astype(np.int)
-            test_loss = self.compute_loss(w_users[u_idx], w_products[p_idx], test_data[:, 2])
-            print("Current val loss: ", test_loss)
+            test_loss = self.compute_rmse_loss(w_users[u_idx], w_products[p_idx], test_data[:, 2])
+            print("Current validation RMSE: ", test_loss)
             self.test_res.append(test_loss)
 
-    def compute_loss(self, w_u, w_p, rat):
+    def compute_obj_loss(self, w_u, w_p, rat):
         w_u = w_u
         w_p = w_p
         pred = np.sum(np.multiply(w_u, w_p), 1) + self.mean_rat
@@ -67,12 +67,18 @@ class PMF:
                 0.5 * self.lamda*(np.linalg.norm(w_u)**2 + np.linalg.norm(w_p)**2)
         return error/rat.shape[0]
 
+    def compute_rmse_loss(self, w_u, w_p, rat):
+        pred = np.sum(np.multiply(w_u, w_p), 1) + self.mean_rat
+        err  = rat - pred
+        loss = np.linalg.norm(err)/np.sqrt(pred.shape[0]) 
+        return loss
+
     def plot_loss(self):
         plt.plot(np.arange(self.params["epoch"]), self.train_res, color="red", label="Training Loss")
         plt.plot(np.arange(self.params["epoch"]), self.test_res, color="blue", label="Test Loss")
         plt.legend()
         plt.grid()
-        plt.title("Loss vs Epoch for PMF")
+        plt.title("RMSE Loss vs Epoch for Vanilla PMF")
         plt.xlabel("Epoch")
         plt.ylabel("Loss")
         plt.show()
