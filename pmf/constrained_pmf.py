@@ -97,14 +97,14 @@ class CPMF:
                 w_filter = train_data[train_data[:, 0] == u][:, 1].astype(int)
                 ws = np.mean(W[w_filter], axis=0)
                 w_U[u] += ws
-            training_loss = self.compute_rmse_loss(w_U, w_V, train_data[:, 2])
+            training_loss = self.compute_rmse(w_U, w_V, train_data[:, 2])
             print("finished. Current training RMSE: ", training_loss, end=" ")
             self.train_res.append(training_loss)
             u_idx = test_data[:, 0].astype(np.int)
             p_idx = test_data[:, 1].astype(np.int)
             w_V = V[p_idx]
             w_U = Y[u_idx]
-            test_loss = self.compute_rmse_loss(w_U, w_V, test_data[:, 2])
+            test_loss = self.compute_rmse(w_U, w_V, test_data[:, 2])
             print("Current validation RMSE: ", test_loss)
             self.test_res.append(test_loss)
 
@@ -117,7 +117,7 @@ class CPMF:
     #            0.5 * self.lamda*(np.linalg.norm(w_u)**2 + np.linalg.norm(w_p)**2)
     #    return error/rat.shape[0]
 
-    def compute_rmse_loss(self, U, V, rat):
+    def compute_rmse(self, U, V, rat):
         pred = np.sum(np.multiply(U, V), 1)
         g_pred = self.sigmoid(pred)
         g_pred = self.transform_ratings(g_pred)
